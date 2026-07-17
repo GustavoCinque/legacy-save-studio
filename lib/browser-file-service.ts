@@ -15,6 +15,19 @@ export type BrowserDirectoryHandle = {
 };
 
 export type BrowserPicker = () => Promise<BrowserDirectoryHandle>;
+export type BrowserJsonOpener = (name: string, contents: Promise<string>) => void | Promise<void>;
+
+async function openJsonInBrowser(_name: string, contents: Promise<string>): Promise<void> {
+  const opened = window.open("about:blank", "_blank");
+  if (!opened) throw new Error("The browser blocked the JSON window");
+  try {
+    const url = URL.createObjectURL(new Blob([await contents], { type: "application/json" }));
+    opened.location.href = url;
+  } catch (error) {
+    opened.close();
+    throw error;
+  }
+}
 
 function timestamp(date = new Date()): string {
   const pad = (value: number, length = 2) => String(value).padStart(length, "0");
@@ -50,7 +63,7 @@ async function copyBundle(source: BrowserDirectoryHandle, target: BrowserDirecto
   await writeBundle(target, await readBundle(source));
 }
 
-export function createBrowserFileService(pickDirectory: BrowserPicker) {
+export function createBrowserFileService(pickDirectory: BrowserPicker, openJson: BrowserJsonOpener = openJsonInBrowser) {
   let directory: BrowserDirectoryHandle | null = null;
   let backupSequence = 0;
 
@@ -107,6 +120,12 @@ export function createBrowserFileService(pickDirectory: BrowserPicker) {
       const safety = await createBackup("backup_before_restore");
       await writeBundle(selected, restoredBundle);
       return { directory: { path: BROWSER_SAVE_TOKEN, name: selected.name }, bundle: restoredBundle, safety };
+    },
+    async openSaveFile(_path: string, fileName: string) {
+      if (!SAVE_FILES.includes(fileName as (typeof SAVE_FILES)[number])) throw new Error("Invalid save file name");
+      const contents = requireDirectory().getFileHandle(fileName).then(handle => handle.getFile()).then(file => file.text());
+      await openJson(fileName, contents);
+      return true;
     },
     async openDirectory() { return false; },
   };

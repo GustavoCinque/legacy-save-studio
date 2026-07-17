@@ -5,6 +5,28 @@ import { saveDirectory } from "./helpers/fake-browser-fs.mjs";
 
 const fixture = () => ({ player: { playerName: "Browser", unitDex: [], unknown: { keep: true } }, inventory: { nextKey: 0, playerUnits: {} }, parties: { parties: {} } });
 
+test("browser JSON shortcuts open the selected save files and reject arbitrary paths", async () => {
+  const opened = [];
+  const service = createBrowserFileService(async () => saveDirectory(fixture()), async (name, contents) => opened.push({ name, contents: await contents }));
+  await service.selectSaveDirectory();
+  for (const name of ["playerdata.json", "unitinventory.json", "parties.json"]) await service.openSaveFile(BROWSER_SAVE_TOKEN, name);
+  assert.deepEqual(opened.map(item => item.name), ["playerdata.json", "unitinventory.json", "parties.json"]);
+  assert.equal(JSON.parse(opened[0].contents).playerName, "Browser");
+  await assert.rejects(() => service.openSaveFile(BROWSER_SAVE_TOKEN, "../package.json"), /Invalid save file name/);
+});
+
+test("browser JSON shortcuts reserve their window before asynchronous file reading", async () => {
+  let reserved = false;
+  const service = createBrowserFileService(async () => saveDirectory(fixture()), (_name, contents) => {
+    reserved = true;
+    return contents.then(() => undefined);
+  });
+  await service.selectSaveDirectory();
+  const opening = service.openSaveFile(BROWSER_SAVE_TOKEN, "playerdata.json");
+  assert.equal(reserved, true);
+  await opening;
+});
+
 test("browser mode selects a folder and loads all three save files", async () => {
   const directory = saveDirectory(fixture());
   const service = createBrowserFileService(async () => directory);
