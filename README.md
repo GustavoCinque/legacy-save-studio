@@ -64,3 +64,45 @@ The portable Windows package is written to `release/LegacySaveStudio-Windows-x64
 ## Privacy and safety
 
 Save files remain on your computer. The project does not upload them to a server. Both storage modes validate JSON and create a complete backup before writing changes.
+
+## App screenshots
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://github.com/user-attachments/assets/fb6f2fe4-3339-47c4-8541-ab5e11a89c1f">
+        <img src="https://github.com/user-attachments/assets/fb6f2fe4-3339-47c4-8541-ab5e11a89c1f" alt="Screenshot 1">
+      </a>
+    </td>
+    <td width="50%">
+      <a href="https://github.com/user-attachments/assets/cb28c84a-9771-41ed-abba-28ca6da33d20">
+        <img src="https://github.com/user-attachments/assets/cb28c84a-9771-41ed-abba-28ca6da33d20" alt="Screenshot 2">
+      </a>
+    </td>
+  </tr>
+
+  <tr>
+    <td width="50%">
+      <a href="https://github.com/user-attachments/assets/a7d49464-7ab7-4a19-9763-f99c27b799a7">
+        <img src="https://github.com/user-attachments/assets/a7d49464-7ab7-4a19-9763-f99c27b799a7" alt="Screenshot 3">
+      </a>
+    </td>
+    <td width="50%">
+      <a href="https://github.com/user-attachments/assets/6d161e39-2fa7-40ab-9e30-4ef481b459c7">
+        <img src="https://github.com/user-attachments/assets/6d161e39-2fa7-40ab-9e30-4ef481b459c7" alt="Screenshot 4">
+      </a>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="2" align="center">
+      <a href="https://github.com/user-attachments/assets/ff9b2dd6-6d2e-4b0b-885c-1aa4dccf6141">
+        <img width="50%" src="https://github.com/user-attachments/assets/ff9b2dd6-6d2e-4b0b-885c-1aa4dccf6141" alt="Screenshot 5">
+      </a>
+    </td>
+  </tr>
+</table>
+
+
+
+
