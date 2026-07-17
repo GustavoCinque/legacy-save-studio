@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "export",
   assetPrefix: ".",
   images: { unoptimized: true },
+  turbopack: { root: process.cwd() },
 };
 
 export default nextConfig;

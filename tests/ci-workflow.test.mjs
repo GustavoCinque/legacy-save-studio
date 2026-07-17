@@ -7,6 +7,12 @@ const require = createRequire(import.meta.url);
 const { versionTag } = require("../scripts/version-tag.cjs");
 
 const workflowPath = new URL("../.github/workflows/build-electron.yml", import.meta.url);
+const nextConfigPath = new URL("../next.config.ts", import.meta.url);
+
+test("Turbopack is isolated from lockfiles in parent directories", async () => {
+  const config = await readFile(nextConfigPath, "utf8");
+  assert.match(config, /turbopack:\s*\{\s*root:\s*process\.cwd\(\)\s*\}/);
+});
 
 test("CI tests the project and publishes the portable ZIP as an artifact", async () => {
   const workflow = await readFile(workflowPath, "utf8");
