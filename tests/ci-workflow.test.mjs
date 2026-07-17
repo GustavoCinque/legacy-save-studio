@@ -8,10 +8,18 @@ const { versionTag } = require("../scripts/version-tag.cjs");
 
 const workflowPath = new URL("../.github/workflows/build-electron.yml", import.meta.url);
 const nextConfigPath = new URL("../next.config.ts", import.meta.url);
+const packagePath = new URL("../package.json", import.meta.url);
 
 test("Turbopack is isolated from lockfiles in parent directories", async () => {
   const config = await readFile(nextConfigPath, "utf8");
   assert.match(config, /turbopack:\s*\{\s*root:\s*process\.cwd\(\)\s*\}/);
+  assert.match(config, /assetPrefix:\s*process\.env\.NODE_ENV\s*===\s*"production"\s*\?\s*"\."\s*:\s*undefined/);
+});
+
+test("local web and Electron development avoid the Turbopack compile hang", async () => {
+  const pkg = JSON.parse(await readFile(packagePath, "utf8"));
+  assert.equal(pkg.scripts.dev, "next dev --webpack");
+  assert.match(pkg.scripts["dev:electron"], /next dev --webpack/);
 });
 
 test("CI tests the project and publishes the portable ZIP as an artifact", async () => {

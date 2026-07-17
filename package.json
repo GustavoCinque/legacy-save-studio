@@ -9,8 +9,8 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "dev:electron": "concurrently -k \"next dev\" \"wait-on http://localhost:3000 && cross-env ELECTRON_DEV_URL=http://localhost:3000 electron .\"",
+    "dev": "next dev --webpack",
+    "dev:electron": "concurrently -k \"next dev --webpack\" \"wait-on http://localhost:3000 && cross-env ELECTRON_DEV_URL=http://localhost:3000 electron .\"",
     "build": "next build",
     "build:electron": "npm run build && electron-builder --win nsis",
     "build:portable": "npm run build && powershell -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
