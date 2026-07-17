@@ -3,6 +3,18 @@ import assert from "node:assert/strict";
 import { createBrowserFileService } from "../work/test-dist/lib/browser-file-service.js";
 import { saveDirectory } from "./helpers/fake-browser-fs.mjs";
 
+test("eval: every save shortcut opens valid JSON for arbitrary save contents", async () => {
+  const initial = { player: { unicode: "Bravé", unitDex: [] }, inventory: { nextKey: 91, playerUnits: { "90": { unitId: "10011" } } }, parties: { parties: { "0": { leaderUnitIndex: 0, slots: {} } } } };
+  const opened = new Map();
+  const service = createBrowserFileService(async () => saveDirectory(initial), async (name, contents) => opened.set(name, JSON.parse(await contents)));
+  await service.selectSaveDirectory();
+  for (const name of ["playerdata.json", "unitinventory.json", "parties.json"]) await service.openSaveFile("browser://selected-save", name);
+  assert.equal(opened.size, 3);
+  assert.equal(opened.get("playerdata.json").unicode, "Bravé");
+  assert.equal(opened.get("unitinventory.json").nextKey, 91);
+  assert.deepEqual(opened.get("parties.json").parties["0"].slots, {});
+});
+
 test("eval: repeated browser saves remain readable and retain arbitrary game fields", async () => {
   const initial = { player: { unitDex: [], nested: { a: [1, 2, 3] } }, inventory: { nextKey: 0, playerUnits: {}, futureField: "preserved" }, parties: { parties: {} } };
   const service = createBrowserFileService(async () => saveDirectory(initial));

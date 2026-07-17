@@ -16,6 +16,12 @@ function assertSaveDirectory(directory) {
   return path.resolve(directory);
 }
 
+function resolveSaveFile(directory, fileName) {
+  const resolved = assertSaveDirectory(directory);
+  if (!FILES.includes(fileName)) throw new Error("Arquivo de save inválido");
+  return path.join(resolved, fileName);
+}
+
 function readJson(filePath) {
   const text = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
   const value = JSON.parse(text);
@@ -101,4 +107,4 @@ function saveBundleWithoutBackup(directory, bundle) {
   try { FILES.forEach((name,i)=>fs.renameSync(temp[i],path.join(directory,name))); } finally { temp.forEach(file=>{if(fs.existsSync(file))fs.unlinkSync(file)}); }
 }
 
-module.exports = { FILES, defaultSavePath, assertSaveDirectory, loadSave, createBackup, saveBundle, listBackups, deleteBackups, restoreBackup };
+module.exports = { FILES, defaultSavePath, assertSaveDirectory, resolveSaveFile, loadSave, createBackup, saveBundle, listBackups, deleteBackups, restoreBackup };

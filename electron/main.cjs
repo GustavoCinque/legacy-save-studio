@@ -21,6 +21,7 @@ ipcMain.handle("save:list-backups", (_event, directory) => service.listBackups(d
 ipcMain.handle("save:delete-backups", (_event, {directory,backupName}) => service.deleteBackups(directory,backupName));
 ipcMain.handle("save:restore", (_event, {directory,backupName}) => service.restoreBackup(directory,backupName));
 ipcMain.handle("shell:open-directory", async (_event, directory) => { const resolved=service.assertSaveDirectory(directory); const error=await shell.openPath(resolved); if(error) throw new Error(error); return true; });
+ipcMain.handle("shell:open-save-file", async (_event, {directory,fileName}) => { const resolved=service.resolveSaveFile(directory,fileName); const error=await shell.openPath(resolved); if(error) throw new Error(error); return true; });
 
 app.whenReady().then(() => { createWindow(); app.on("activate",()=>{if(BrowserWindow.getAllWindows().length===0)createWindow()}); });
 app.on("window-all-closed",()=>{if(process.platform!=="darwin")app.quit()});
