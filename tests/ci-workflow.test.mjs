@@ -49,6 +49,9 @@ test("a new package version creates a tag and publishes the same ZIP", async () 
   const workflow = await readFile(workflowPath, "utf8");
   assert.match(workflow, /fetch-depth: 0/);
   assert.match(workflow, /node scripts\/version-tag\.cjs package\.json/);
+  assert.match(workflow, /\$existingTag = git tag --list "\$tag"/);
+  assert.match(workflow, /\$tagExists = -not \[string\]::IsNullOrWhiteSpace\(\$existingTag\)/);
+  assert.doesNotMatch(workflow, /git show-ref/);
   assert.match(workflow, /steps\.version\.outputs\.create == 'true'/);
   assert.match(workflow, /git tag -a/);
   assert.match(workflow, /git push origin/);
