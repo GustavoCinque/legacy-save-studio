@@ -1,0 +1,11 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const service = require("../electron/file-service.cjs");
+function fixture(){const dir=fs.mkdtempSync(path.join(os.tmpdir(),"legacy-studio-"));const bundle={player:{playerName:"Teste",unitDex:["10011"]},inventory:{nextKey:2,playerUnits:{"1":{unitId:"10011",type:0,currentLevel:1}}},parties:{parties:{"0":{slots:{"0":"1"},leaderUnitIndex:0}}}};service.FILES.forEach((name,i)=>fs.writeFileSync(path.join(dir,name),`${JSON.stringify([bundle.player,bundle.inventory,bundle.parties][i])}\n`,"utf8"));return{dir,bundle}}
+test("loads all three save files and reports the directory",()=>{const{dir}=fixture();try{const result=service.loadSave(dir);assert.equal(result.bundle.player.playerName,"Teste");assert.equal(result.directory.path,path.resolve(dir))}finally{fs.rmSync(dir,{recursive:true,force:true})}});
+test("saving creates a complete backup and preserves unknown fields",()=>{const{dir,bundle}=fixture();try{bundle.player.unknownGameField={keep:true};bundle.player.gems=999999;const backup=service.saveBundle(dir,bundle);assert.ok(fs.existsSync(path.join(dir,backup.name,"playerdata.json")));const loaded=service.loadSave(dir);assert.equal(loaded.bundle.player.gems,999999);assert.deepEqual(loaded.bundle.player.unknownGameField,{keep:true})}finally{fs.rmSync(dir,{recursive:true,force:true})}});
+test("restore creates a safety backup and restores prior content",()=>{const{dir,bundle}=fixture();try{const original=service.createBackup(dir);bundle.player.playerName="Alterado";service.saveBundle(dir,bundle);const restored=service.restoreBackup(dir,original.name);assert.equal(restored.bundle.player.playerName,"Teste");assert.match(restored.safety.name,/^backup_before_restore_/)}finally{fs.rmSync(dir,{recursive:true,force:true})}});
+test("rejects missing files and traversal-like backup names",()=>{const{dir}=fixture();try{fs.unlinkSync(path.join(dir,"parties.json"));assert.throws(()=>service.loadSave(dir),/Arquivos ausentes/)}finally{fs.rmSync(dir,{recursive:true,force:true})}const f=fixture();try{assert.throws(()=>service.restoreBackup(f.dir,"../outside"),/inválido/)}finally{fs.rmSync(f.dir,{recursive:true,force:true})}});

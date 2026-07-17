@@ -1,0 +1,63 @@
+{
+  "name": "brave-frontier-legacy-save-studio",
+  "version": "0.1.5",
+  "description": "Editor desktop offline e seguro para saves de Brave Frontier: Legacy.",
+  "author": "Legacy Save Studio Community",
+  "private": true,
+  "main": "electron/main.cjs",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "dev:electron": "concurrently -k \"next dev\" \"wait-on http://localhost:3000 && cross-env ELECTRON_DEV_URL=http://localhost:3000 electron .\"",
+    "build": "next build",
+    "build:electron": "npm run build && electron-builder --win nsis",
+    "build:portable": "npm run build && powershell -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
+    "start": "next start",
+    "test": "tsc -p tsconfig.test.json && node --test tests/editor-core.test.mjs tests/electron-file-service.test.cjs tests/i18n.test.mjs tests/ci-workflow.test.mjs",
+    "eval": "tsc -p tsconfig.test.json && node --test tests/editor-eval.test.mjs",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "dist": "npm run test && npm run eval && npm run build:portable"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "concurrently": "9.2.1",
+    "cross-env": "7.0.3",
+    "electron": "37.2.3",
+    "electron-builder": "26.0.12",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3",
+    "wait-on": "8.0.4"
+  },
+  "type": "module",
+  "build": {
+    "appId": "com.legacysavestudio.app",
+    "productName": "Legacy Save Studio",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": { "output": "release" },
+    "files": ["electron/**/*", "out/**/*", "package.json"],
+    "extraMetadata": { "main": "electron/main.cjs" },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "LegacySaveStudio-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Legacy Save Studio"
+    }
+  }
+}
