@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -50,9 +52,30 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish tagged release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Detect package version
+        id: version
+        shell: powershell
+        run: |
+          $tag = node scripts/version-tag.cjs package.json
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          git show-ref --tags --verify --quiet "refs/tags/$tag"
+          $tagExists = $LASTEXITCODE -eq 0
+          $shouldCreate = "${{ github.event_name }}" -eq "push" -and "${{ github.ref }}" -eq "refs/heads/main" -and -not $tagExists
+          "create=$($shouldCreate.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Create version tag
+        if: steps.version.outputs.create == 'true'
+        shell: powershell
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Legacy Save Studio ${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: Publish release
+        if: steps.version.outputs.create == 'true' || startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || steps.version.outputs.tag }}
           files: dist/LegacySaveStudio-Windows-x64.zip
           generate_release_notes: true
