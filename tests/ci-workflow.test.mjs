@@ -10,12 +10,25 @@ const workflowPath = new URL("../.github/workflows/build-electron.yml", import.m
 
 test("CI tests the project and publishes the portable ZIP as an artifact", async () => {
   const workflow = await readFile(workflowPath, "utf8");
+  assert.match(workflow, /validate:\s+ runs-on: windows-latest/);
+  assert.match(workflow, /package-and-release:\s+ needs: validate/);
+  assert.match(workflow, /if: github\.event_name == 'push'/);
+  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /runs-on: windows-latest/);
   assert.match(workflow, /run: npm test/);
   assert.match(workflow, /run: npm run eval/);
   assert.match(workflow, /npm run build:portable/);
   assert.match(workflow, /actions\/upload-artifact@v4/);
   assert.match(workflow, /dist\/LegacySaveStudio-Windows-x64\.zip/);
+});
+
+test("pull requests validate but never package, tag, or release", async () => {
+  const workflow = await readFile(workflowPath, "utf8");
+  const packageJob = workflow.slice(workflow.indexOf("  package-and-release:"));
+  assert.match(packageJob, /needs: validate/);
+  assert.match(packageJob, /if: github\.event_name == 'push'/);
+  assert.doesNotMatch(packageJob, /pull_request/);
+  assert.match(workflow.slice(0, workflow.indexOf("  package-and-release:")), /pull_request:/);
 });
 
 test("a new package version creates a tag and publishes the same ZIP", async () => {
