@@ -108,7 +108,10 @@ export function validateBundle(bundle: SaveBundle): string[] {
     const slots = raw?.slots;
     if (!slots || typeof slots !== "object") { errors.push(`party ${partyKey}: invalid slots object`); continue; }
     for (const [slot, key] of Object.entries(slots as JsonObject)) if (!(String(key) in units)) errors.push(`party ${partyKey}, slot ${slot}: inventory key ${String(key)} does not exist`);
-    if (!(String(raw.leaderUnitIndex ?? "") in (slots as JsonObject))) errors.push(`party ${partyKey}: invalid leaderUnitIndex`);
+    const leader = raw.leaderUnitIndex;
+    const hasLeaderSlot = String(leader ?? "") in (slots as JsonObject);
+    const hasNoLeader = leader === 0 && Object.keys(slots as JsonObject).length === 0;
+    if (!hasLeaderSlot && !hasNoLeader) errors.push(`party ${partyKey}: invalid leaderUnitIndex`);
   }
   return errors;
 }
