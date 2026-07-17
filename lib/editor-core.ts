@@ -94,6 +94,28 @@ export function deleteUnits(bundle: SaveBundle, keys: string[]): string[] {
   return refs;
 }
 
+export function normalizeInventoryKeys(bundle: SaveBundle): { changed: number; nextKey: number } {
+  const entries = Object.entries(owned(bundle)).sort(([left], [right]) => {
+    const leftNumeric = /^\d+$/.test(left); const rightNumeric = /^\d+$/.test(right);
+    if (leftNumeric && rightNumeric) return Number(left) - Number(right);
+    if (leftNumeric !== rightNumeric) return leftNumeric ? -1 : 1;
+    return left.localeCompare(right);
+  });
+  const mapping = new Map(entries.map(([oldKey], index) => [oldKey, String(index)]));
+  bundle.inventory.playerUnits = Object.fromEntries(entries.map(([oldKey, unit]) => [mapping.get(oldKey), unit]));
+  bundle.inventory.nextKey = entries.length;
+  const parties = bundle.parties.parties;
+  if (parties && typeof parties === "object") for (const party of Object.values(parties as Record<string, JsonObject>)) {
+    const slots = party?.slots;
+    if (!slots || typeof slots !== "object") continue;
+    for (const [slot, oldKey] of Object.entries(slots as JsonObject)) {
+      const next = mapping.get(String(oldKey));
+      if (next !== undefined) (slots as JsonObject)[slot] = typeof oldKey === "number" ? Number(next) : next;
+    }
+  }
+  return { changed: entries.filter(([oldKey], index) => oldKey !== String(index)).length, nextKey: entries.length };
+}
+
 export function validateBundle(bundle: SaveBundle): string[] {
   const errors: string[] = [];
   if (!bundle.player || typeof bundle.player !== "object") return ["playerdata is not a JSON object"];
