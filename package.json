@@ -15,8 +15,8 @@
     "build:electron": "npm run build && electron-builder --win nsis",
     "build:portable": "npm run build && powershell -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
     "start": "next start",
-    "test": "tsc -p tsconfig.test.json && node --test tests/editor-core.test.mjs tests/electron-file-service.test.cjs tests/i18n.test.mjs tests/ci-workflow.test.mjs",
-    "eval": "tsc -p tsconfig.test.json && node --test tests/editor-eval.test.mjs",
+    "test": "tsc -p tsconfig.test.json && node --test tests/editor-core.test.mjs tests/electron-file-service.test.cjs tests/browser-file-service.test.mjs tests/i18n.test.mjs tests/ci-workflow.test.mjs",
+    "eval": "tsc -p tsconfig.test.json && node --test tests/editor-eval.test.mjs tests/browser-file-service-eval.test.mjs tests/version-tag-eval.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "dist": "npm run test && npm run eval && npm run build:portable"
   },

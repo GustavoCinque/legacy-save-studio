@@ -8,7 +8,8 @@
     "moduleResolution": "Bundler",
     "target": "ES2022",
     "declaration": false,
-    "sourceMap": false
+    "sourceMap": false,
+    "types": ["node"]
   },
-  "include": ["lib/editor-core.ts", "lib/i18n.ts"]
+  "include": ["lib/editor-core.ts", "lib/i18n.ts", "lib/browser-file-service.ts"]
 }
