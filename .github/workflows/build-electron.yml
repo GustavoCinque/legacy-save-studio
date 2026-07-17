@@ -79,8 +79,8 @@ jobs:
         run: |
           $tag = node scripts/version-tag.cjs package.json
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          git show-ref --tags --verify --quiet "refs/tags/$tag"
-          $tagExists = $LASTEXITCODE -eq 0
+          $existingTag = git tag --list "$tag"
+          $tagExists = -not [string]::IsNullOrWhiteSpace($existingTag)
           $shouldCreate = "${{ github.ref }}" -eq "refs/heads/main" -and -not $tagExists
           "create=$($shouldCreate.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
