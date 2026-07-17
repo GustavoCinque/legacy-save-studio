@@ -11,6 +11,7 @@ export type BrowserDirectoryHandle = {
   getFileHandle(name: string, options?: { create?: boolean }): Promise<BrowserFileHandle>;
   getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<BrowserDirectoryHandle>;
   values(): AsyncIterable<{ kind: "file" | "directory"; name: string }>;
+  removeEntry(name: string, options?: { recursive?: boolean }): Promise<void>;
 };
 
 export type BrowserPicker = () => Promise<BrowserDirectoryHandle>;
@@ -90,6 +91,13 @@ export function createBrowserFileService(pickDirectory: BrowserPicker) {
         }
       }
       return backups.sort((a, b) => b.name.localeCompare(a.name));
+    },
+    async deleteBackups(_path: string, backupName?: string) {
+      const selected = requireDirectory();
+      const names = backupName ? [backupName] : (await this.listBackups()).map(item => item.name);
+      if (names.some(name => !/^backup_[\w-]+$/.test(name))) throw new Error("Invalid backup name");
+      await Promise.all(names.map(name => selected.removeEntry(name, { recursive: true })));
+      return names.length;
     },
     async restoreBackup(_path: string, backupName: string) {
       if (!/^backup_[\w-]+$/.test(backupName)) throw new Error("Invalid backup name");

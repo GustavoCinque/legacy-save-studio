@@ -38,3 +38,16 @@ test("browser restore makes a safety backup before replacing current files", asy
   assert.equal(restored.bundle.player.playerName, "Browser");
   assert.match(restored.safety.name, /^backup_before_restore_/);
 });
+
+test("browser backups can be deleted individually or all at once", async () => {
+  const service = createBrowserFileService(async () => saveDirectory(fixture()));
+  await service.selectSaveDirectory();
+  const bundle = (await service.loadSave()).bundle;
+  const first = await service.saveBundle(BROWSER_SAVE_TOKEN, bundle);
+  await service.saveBundle(BROWSER_SAVE_TOKEN, bundle);
+  assert.equal(await service.deleteBackups(BROWSER_SAVE_TOKEN, first.name), 1);
+  assert.equal((await service.listBackups()).length, 1);
+  assert.equal(await service.deleteBackups(BROWSER_SAVE_TOKEN), 1);
+  assert.deepEqual(await service.listBackups(), []);
+  await assert.rejects(() => service.deleteBackups(BROWSER_SAVE_TOKEN, "../save"), /Invalid backup name/);
+});

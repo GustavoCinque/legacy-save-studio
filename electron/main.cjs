@@ -18,6 +18,7 @@ ipcMain.handle("save:select-directory", async () => { const result=await dialog.
 ipcMain.handle("save:load", (_event, directory) => service.loadSave(directory));
 ipcMain.handle("save:write", (_event, {directory,bundle}) => service.saveBundle(directory,bundle));
 ipcMain.handle("save:list-backups", (_event, directory) => service.listBackups(directory));
+ipcMain.handle("save:delete-backups", (_event, {directory,backupName}) => service.deleteBackups(directory,backupName));
 ipcMain.handle("save:restore", (_event, {directory,backupName}) => service.restoreBackup(directory,backupName));
 ipcMain.handle("shell:open-directory", async (_event, directory) => { const resolved=service.assertSaveDirectory(directory); const error=await shell.openPath(resolved); if(error) throw new Error(error); return true; });
 

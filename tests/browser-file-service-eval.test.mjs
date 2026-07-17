@@ -18,3 +18,12 @@ test("eval: repeated browser saves remain readable and retain arbitrary game fie
   assert.equal(final.inventory.futureField, "preserved");
   assert.equal((await service.listBackups()).length, 5);
 });
+
+test("eval: bulk backup deletion never changes the active browser save", async () => {
+  const initial = { player: { marker: "active", unitDex: [] }, inventory: { nextKey: 0, playerUnits: {} }, parties: { parties: {} } };
+  const service = createBrowserFileService(async () => saveDirectory(initial));
+  await service.selectSaveDirectory();
+  for (let index = 0; index < 10; index++) await service.saveBundle("browser://selected-save", (await service.loadSave()).bundle);
+  assert.equal(await service.deleteBackups("browser://selected-save"), 10);
+  assert.equal((await service.loadSave()).bundle.player.marker, "active");
+});
