@@ -22,6 +22,13 @@ export class FakeDirectoryHandle {
     for (const name of this.files.keys()) yield { kind: "file", name };
     for (const name of this.directories.keys()) yield { kind: "directory", name };
   }
+  async removeEntry(name, options = {}) {
+    if (this.files.delete(name)) return;
+    const directory = this.directories.get(name);
+    if (!directory) throw new DOMException(`Missing ${name}`, "NotFoundError");
+    if (!options.recursive && (directory.files.size || directory.directories.size)) throw new DOMException(`Not empty ${name}`, "InvalidModificationError");
+    this.directories.delete(name);
+  }
 }
 
 export function saveDirectory(bundle) {

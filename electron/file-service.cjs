@@ -81,6 +81,13 @@ function safeBackupPath(directory, backupName) {
   return assertSaveDirectory(candidate);
 }
 
+function deleteBackups(directory, backupName) {
+  const resolved = assertSaveDirectory(directory);
+  const names = backupName ? [backupName] : listBackups(resolved).map(item => item.name);
+  for (const name of names) fs.rmSync(safeBackupPath(resolved, name), { recursive: true, force: false });
+  return names.length;
+}
+
 function restoreBackup(directory, backupName) {
   const resolved = assertSaveDirectory(directory); const source = safeBackupPath(resolved, backupName);
   const values = FILES.map(name => readJson(path.join(source, name)));
@@ -94,4 +101,4 @@ function saveBundleWithoutBackup(directory, bundle) {
   try { FILES.forEach((name,i)=>fs.renameSync(temp[i],path.join(directory,name))); } finally { temp.forEach(file=>{if(fs.existsSync(file))fs.unlinkSync(file)}); }
 }
 
-module.exports = { FILES, defaultSavePath, assertSaveDirectory, loadSave, createBackup, saveBundle, listBackups, restoreBackup };
+module.exports = { FILES, defaultSavePath, assertSaveDirectory, loadSave, createBackup, saveBundle, listBackups, deleteBackups, restoreBackup };
