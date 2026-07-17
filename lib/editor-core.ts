@@ -33,6 +33,14 @@ export function matchesRarity(rarity: unknown, filter: string): boolean {
   return selected !== undefined && String(rarity) === selected;
 }
 
+export function formatRarity(rarity: unknown, star: string, stars: string, omni: string): string {
+  const internal = Number(rarity);
+  if (!Number.isInteger(internal) || internal < 0 || internal > 7) return "—";
+  if (internal === 7) return omni;
+  const displayed = internal + 1;
+  return `${displayed} ${displayed === 1 ? star : stars}`;
+}
+
 export function selectFiltered(current: string[], filteredKeys: string[]): string[] {
   return [...new Set([...current, ...filteredKeys])];
 }
