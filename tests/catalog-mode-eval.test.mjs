@@ -15,3 +15,10 @@ test("eval: full mode remains unchanged and can still expose excluded units inte
   const fullIds = new Set(read("units_database_simple.json").map(unit => Number(unit.unitId)));
   assert.ok([...blocked].some(id => fullIds.has(id)));
 });
+
+test("eval: catalog mode and page navigation stay close to the workflows they affect", () => {
+  const page = fs.readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /catalog-table-tools/);
+  assert.match(page, /player-catalog-setting/);
+  assert.equal((page.match(/<footer>.*catalog-pagination/g) ?? []).length, 0);
+});
