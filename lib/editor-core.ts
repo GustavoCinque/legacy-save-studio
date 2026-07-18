@@ -45,6 +45,13 @@ export function selectFiltered(current: string[], filteredKeys: string[]): strin
   return [...new Set([...current, ...filteredKeys])];
 }
 
+export function paginate<T>(items: T[], requestedPage: number, pageSize = 250): { items: T[]; page: number; totalPages: number; total: number } {
+  if (!Number.isInteger(pageSize) || pageSize < 1) throw new RangeError("pageSize must be a positive integer");
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const page = Math.min(Math.max(1, Math.trunc(requestedPage) || 1), totalPages);
+  return { items: items.slice((page - 1) * pageSize, page * pageSize), page, totalPages, total: items.length };
+}
+
 export function freeKey(bundle: SaveBundle): number {
   const used = new Set(Object.keys(owned(bundle)).filter(k => /^\d+$/.test(k)).map(Number));
   let key = asInt(bundle.inventory.nextKey ?? 0, "nextKey");

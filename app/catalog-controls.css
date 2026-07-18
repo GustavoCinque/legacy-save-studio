@@ -1,0 +1,65 @@
+.catalog-select,
+.catalog-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalog-select {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+}
+
+.catalog-select select {
+  min-width: 175px;
+  padding: 8px 10px;
+}
+
+.catalog-pagination span {
+  min-width: 105px;
+  text-align: center;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.catalog-pagination button {
+  padding: 8px 12px;
+}
+
+.catalog-pagination small {
+  margin-left: 8px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.catalog-table-tools {
+  min-height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--line);
+  background: #fbfcfb;
+}
+
+.catalog-table-tools .internal {
+  padding: 0;
+  border: 0;
+}
+
+.player-catalog-setting {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 25px;
+  border-top: 1px solid var(--line);
+  background: #fbfcfb;
+}
+
+.player-catalog-setting > small {
+  color: var(--muted);
+}

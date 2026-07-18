@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addUnit, formatRarity, matchesRarity, normalizeInventoryKeys, selectFiltered, TYPES, validateBundle } from "../work/test-dist/lib/editor-core.js";
+import { addUnit, formatRarity, matchesRarity, normalizeInventoryKeys, paginate, selectFiltered, TYPES, validateBundle } from "../work/test-dist/lib/editor-core.js";
 
 const base=()=>({player:{unitDex:[]},inventory:{nextKey:0,playerUnits:{}},parties:{parties:{"0":{slots:{},leaderUnitIndex:0}}}});
 test("eval: every generated unit type and upgrade option stays schema-valid",()=>{for(let type=0;type<TYPES.length;type++){const b=base();addUnit(b,{unitId:10011,maxLevel:150,sbbId:8},{type,maxLevel:true,maxBB:true,maxSBB:true});b.parties.parties["0"].slots["0"]="0";assert.deepEqual(validateBundle(b),[],`type ${type}`)}});
@@ -10,3 +10,5 @@ test("eval: each star choice isolates its catalog rarity",()=>{const catalog=[0,
 test("eval: all internal rarities have unique player-facing labels without zero or eight stars",()=>{const labels=Array.from({length:8},(_,rarity)=>formatRarity(rarity,"star","stars","Omni"));assert.deepEqual(labels,["1 star","2 stars","3 stars","4 stars","5 stars","6 stars","7 stars","Omni"]);assert.equal(new Set(labels).size,8)});
 test("eval: selecting changing filtered lists remains complete and duplicate-free",()=>{let selected=selectFiltered([],['1','2']);selected=selectFiltered(selected,['2','3']);selected=selectFiltered(selected,['1','3']);assert.deepEqual(selected,['1','2','3'])});
 test("eval: normalization produces a contiguous valid inventory for arbitrary gaps",()=>{for(let size=0;size<40;size++){const b=base();for(let index=0;index<size;index++)b.inventory.playerUnits[String(index*7+3)]={unitId:String(index),type:0,currentLevel:1};b.inventory.nextKey=999;normalizeInventoryKeys(b);assert.deepEqual(Object.keys(b.inventory.playerUnits),Array.from({length:size},(_,index)=>String(index)));assert.equal(b.inventory.nextKey,size);assert.deepEqual(validateBundle(b),[],`size ${size}`)}});
+test("eval: no catalog page can expose more than 250 units to bulk addition",()=>{for(let size=0;size<3000;size+=37){const units=Array.from({length:size},(_,id)=>id);const pages=Math.max(1,Math.ceil(size/250));for(let page=1;page<=pages;page++)assert.ok(paginate(units,page).items.length<=250,`size ${size}, page ${page}`)}});
+test("eval: catalog navigation describes every page without a zero-page state",()=>{for(let size=0;size<1000;size++){const result=paginate(Array.from({length:size}),999);assert.ok(result.page>=1);assert.ok(result.totalPages>=1);assert.ok(result.page<=result.totalPages)}});
