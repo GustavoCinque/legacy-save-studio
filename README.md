@@ -11,6 +11,7 @@ A local, offline save editor for **Brave Frontier: Legacy**, built with Next.js,
 - Supports Lord, Anima, Breaker, Guardian, Oracle, and Rex unit types.
 - Filters units by name, ID, element, rarity, and type.
 - Adds catalog units individually or in bulk.
+- Uses the game-compatible catalog by default, with an optional full database mode.
 - Manages parties, slots, and leaders.
 - Validates save files before writing.
 - Creates automatic backups and safely restores previous versions.
@@ -52,6 +53,14 @@ npm test
 npm run eval
 npm run build
 ```
+
+When `public/data/unsupported_unit_ids.json` changes, regenerate the compatible catalog copies with:
+
+```powershell
+npm run catalog:compatible
+```
+
+The **Game compatible** mode omits units confirmed as missing from the current game build. The **Full** mode preserves every database entry and may contain units that prevent the in-game inventory from rendering.
 
 ## Build
 
