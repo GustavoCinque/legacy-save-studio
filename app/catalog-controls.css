@@ -1,0 +1,30 @@
+.catalog-select,
+.catalog-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalog-select {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+}
+
+.catalog-select select {
+  min-width: 175px;
+  padding: 8px 10px;
+}
+
+.catalog-pagination span {
+  min-width: 105px;
+  text-align: center;
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.catalog-pagination button {
+  padding: 8px 12px;
+}
