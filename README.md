@@ -3,8 +3,10 @@
 [![Build Electron](https://github.com/GustavoCinque/legacy-save-studio/actions/workflows/build-electron.yml/badge.svg)](https://github.com/GustavoCinque/legacy-save-studio/actions/workflows/build-electron.yml)
 
 > [!IMPORTANT]
-> This is an unofficial community tool. It is not affiliated with, endorsed by,
-> or sponsored by the developers or publishers of Brave Frontier: Legacy.
+> Brave Frontier and all related names, trademarks, characters, and game
+> content are the property of their respective owners. Legacy Save Studio is
+> an unofficial, non-commercial community project and is not affiliated with,
+> endorsed by, or sponsored by any rights holder.
 
 ## Features
 
@@ -77,11 +79,16 @@ The portable Windows package is written to `release/LegacySaveStudio-Windows-x64
 
 Save files remain on your computer. The project does not upload them to a server. Both storage modes validate JSON and create a complete backup before writing changes.
 
-## License and game data
+## License and third-party content
 
-The original editor source code is released under the MIT License. Game names,
-unit names, statistics, and other game-derived data are not covered by that
-license. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The MIT License applies exclusively to the original source code and
+documentation created for this project. It does not grant any rights to
+third-party trademarks, game data, artwork, text, characters, or other
+game-derived content.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for data provenance and
+third-party notices. Rights holders may request attribution changes or content
+removal through the [content-removal request form](https://github.com/GustavoCinque/legacy-save-studio/issues/new?template=content-removal.yml).
 
 ## App screenshots
 
