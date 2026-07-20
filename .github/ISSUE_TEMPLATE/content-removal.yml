@@ -1,0 +1,55 @@
+name: Content removal or attribution request
+description: Request removal of content or a correction to third-party attribution
+title: "[Content request]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form if you are a rights holder or an authorized representative requesting removal of content or corrected attribution. Do not include private personal information. This public form is not a substitute for GitHub's formal copyright or trademark reporting channels.
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request type
+      options:
+        - Content removal
+        - Attribution correction
+        - Trademark concern
+        - Other rights-holder request
+    validations:
+      required: true
+  - type: textarea
+    id: work
+    attributes:
+      label: Protected work or right
+      description: Identify the work, trademark, or other right involved.
+    validations:
+      required: true
+  - type: textarea
+    id: locations
+    attributes:
+      label: Repository locations
+      description: List the exact files, links, or release artifacts affected.
+      placeholder: public/data/example.json
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Relationship to the rights holder
+      description: State whether you are the rights holder or an authorized representative. Do not post confidential evidence; the maintainer can arrange a private follow-up if needed.
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: Requested action
+      description: Explain the removal or attribution correction requested.
+    validations:
+      required: true
+  - type: checkboxes
+    id: accuracy
+    attributes:
+      label: Confirmation
+      options:
+        - label: I confirm that the information in this request is accurate to the best of my knowledge.
+          required: true

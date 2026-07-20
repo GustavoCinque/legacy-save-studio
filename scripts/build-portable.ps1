@@ -14,6 +14,8 @@ Copy-Item -Path (Join-Path $electronDist '*') -Destination $target -Recurse -For
 Copy-Item -Path (Join-Path $root 'electron\*') -Destination (Join-Path $resources 'electron') -Recurse -Force
 Copy-Item -Path (Join-Path $root 'out\*') -Destination (Join-Path $resources 'out') -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $root 'package.json') -Destination (Join-Path $resources 'package.json') -Force
+Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $target 'LICENSE.LegacySaveStudio.txt') -Force
+Copy-Item -LiteralPath (Join-Path $root 'THIRD_PARTY_NOTICES.md') -Destination (Join-Path $target 'THIRD_PARTY_NOTICES.md') -Force
 Copy-Item -LiteralPath (Join-Path $target 'electron.exe') -Destination (Join-Path $target 'Legacy Save Studio.exe') -Force
 Remove-Item -LiteralPath (Join-Path $target 'electron.exe') -Force
 
