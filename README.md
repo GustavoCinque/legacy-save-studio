@@ -2,7 +2,9 @@
 
 [![Build Electron](https://github.com/GustavoCinque/legacy-save-studio/actions/workflows/build-electron.yml/badge.svg)](https://github.com/GustavoCinque/legacy-save-studio/actions/workflows/build-electron.yml)
 
-A local, offline save editor for **Brave Frontier: Legacy**, built with Next.js, TypeScript, and Electron.
+> [!IMPORTANT]
+> This is an unofficial community tool. It is not affiliated with, endorsed by,
+> or sponsored by the developers or publishers of Brave Frontier: Legacy.
 
 ## Features
 
@@ -74,6 +76,12 @@ The portable Windows package is written to `release/LegacySaveStudio-Windows-x64
 ## Privacy and safety
 
 Save files remain on your computer. The project does not upload them to a server. Both storage modes validate JSON and create a complete backup before writing changes.
+
+## License and game data
+
+The original editor source code is released under the MIT License. Game names,
+unit names, statistics, and other game-derived data are not covered by that
+license. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## App screenshots
 
