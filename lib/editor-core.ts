@@ -7,6 +7,10 @@ export type JsonObject = Record<string, unknown>;
 export type UnitRecord = Record<(typeof UNIT_FIELDS)[number], number> & { unitId: string; [key: string]: unknown };
 export interface UnitInfo { unitId: number; unitName?: string; unitNumber?: number; element?: number; elementName?: string; rarity?: number; maxLevel?: number; evoFrom?: number | null; evoInto?: number | null; sbbAbility?: unknown; sbbId?: unknown; [key: string]: unknown }
 export interface SaveBundle { player: JsonObject; inventory: JsonObject; parties: JsonObject }
+export type InventorySortCriterion = "party" | "element" | "rarity" | "type" | "unitId";
+export type InventorySortDirection = "asc" | "desc";
+export type InventorySortRule = { criterion: InventorySortCriterion; direction: InventorySortDirection };
+export type InventoryReorderResult = { moved: boolean; changed: number; mapping: Record<string, string> };
 
 export function asInt(value: unknown, label: string): number {
   if (typeof value === "string" && value.trim() === "") throw new Error(`${label}: expected an integer`);
@@ -101,18 +105,19 @@ export function deleteUnits(bundle: SaveBundle, keys: string[]): string[] {
   return refs;
 }
 
-export function normalizeInventoryKeys(bundle: SaveBundle): { changed: number; nextKey: number } {
-  const entries = Object.entries(owned(bundle)).sort(([left], [right]) => {
+function inventoryEntries(bundle: SaveBundle): [string, UnitRecord][] {
+  return Object.entries(owned(bundle)).sort(([left], [right]) => {
     const leftNumeric = /^\d+$/.test(left); const rightNumeric = /^\d+$/.test(right);
     if (leftNumeric && rightNumeric) return Number(left) - Number(right);
     if (leftNumeric !== rightNumeric) return leftNumeric ? -1 : 1;
     return left.localeCompare(right);
   });
-  const mapping = new Map(entries.map(([oldKey], index) => [oldKey, String(index)]));
-  bundle.inventory.playerUnits = Object.fromEntries(entries.map(([oldKey, unit]) => [mapping.get(oldKey), unit]));
-  bundle.inventory.nextKey = entries.length;
+}
+
+function remapPartyReferences(bundle: SaveBundle, mapping: Map<string, string>): void {
   const parties = bundle.parties.parties;
-  if (parties && typeof parties === "object") for (const party of Object.values(parties as Record<string, JsonObject>)) {
+  if (!parties || typeof parties !== "object") return;
+  for (const party of Object.values(parties as Record<string, JsonObject>)) {
     const slots = party?.slots;
     if (!slots || typeof slots !== "object") continue;
     for (const [slot, oldKey] of Object.entries(slots as JsonObject)) {
@@ -120,6 +125,98 @@ export function normalizeInventoryKeys(bundle: SaveBundle): { changed: number; n
       if (next !== undefined) (slots as JsonObject)[slot] = typeof oldKey === "number" ? Number(next) : next;
     }
   }
+}
+
+export function applyInventoryOrder(bundle: SaveBundle, orderedOldKeys: string[]): InventoryReorderResult {
+  const entries = inventoryEntries(bundle);
+  const slotKeys = entries.map(([key]) => key);
+  if (orderedOldKeys.length !== slotKeys.length || new Set(orderedOldKeys).size !== slotKeys.length || orderedOldKeys.some(key => !(key in owned(bundle)))) {
+    throw new Error("inventory order must contain every inventory key exactly once");
+  }
+  const mapping = new Map(orderedOldKeys.map((oldKey, index) => [oldKey, slotKeys[index]]));
+  const units = owned(bundle);
+  bundle.inventory.playerUnits = Object.fromEntries(orderedOldKeys.map((oldKey, index) => [slotKeys[index], units[oldKey]]));
+  remapPartyReferences(bundle, mapping);
+  const changed = orderedOldKeys.filter((oldKey, index) => oldKey !== slotKeys[index]).length;
+  return { moved: changed > 0, changed, mapping: Object.fromEntries(mapping) };
+}
+
+export function inventorySelectionState(bundle: SaveBundle, selectedKeys: string[]): { contiguous: boolean; first: number; last: number; canUp: boolean; canDown: boolean } {
+  const keys = inventoryEntries(bundle).map(([key]) => key);
+  const indices = [...new Set(selectedKeys)].map(key => keys.indexOf(key)).filter(index => index >= 0).sort((a, b) => a - b);
+  const contiguous = indices.length > 0 && indices.every((index, offset) => index === indices[0] + offset);
+  const first = contiguous ? indices[0] : -1;
+  const last = contiguous ? indices[indices.length - 1] : -1;
+  return { contiguous, first, last, canUp: contiguous && first > 0, canDown: contiguous && last < keys.length - 1 };
+}
+
+export function toggleContiguousInventorySelection(current: string[], key: string, orderedKeys: string[]): string[] {
+  const clicked = orderedKeys.indexOf(key);
+  if (clicked < 0) return current.filter(item => orderedKeys.includes(item));
+  const indices = [...new Set(current)].map(item => orderedKeys.indexOf(item)).filter(index => index >= 0).sort((a, b) => a - b);
+  if (!indices.length) return [key];
+  if (!current.includes(key)) {
+    const first = Math.min(indices[0], clicked); const last = Math.max(indices[indices.length - 1], clicked);
+    return orderedKeys.slice(first, last + 1);
+  }
+  const first = indices[0]; const last = indices[indices.length - 1];
+  if (clicked === first) return orderedKeys.slice(first + 1, last + 1);
+  if (clicked === last) return orderedKeys.slice(first, last);
+  const above = clicked - first; const below = last - clicked;
+  return above >= below ? orderedKeys.slice(first, clicked) : orderedKeys.slice(clicked + 1, last + 1);
+}
+
+export function moveInventoryBlock(bundle: SaveBundle, selectedKeys: string[], direction: "up" | "down"): InventoryReorderResult {
+  const keys = inventoryEntries(bundle).map(([key]) => key);
+  const state = inventorySelectionState(bundle, selectedKeys);
+  if (!state.contiguous) throw new Error("selected inventory units must be adjacent");
+  if ((direction === "up" && !state.canUp) || (direction === "down" && !state.canDown)) {
+    return { moved: false, changed: 0, mapping: Object.fromEntries(keys.map(key => [key, key])) };
+  }
+  const ordered = [...keys];
+  if (direction === "up") {
+    const previous = ordered[state.first - 1];
+    ordered.splice(state.first - 1, state.last - state.first + 2, ...ordered.slice(state.first, state.last + 1), previous);
+  } else {
+    const next = ordered[state.last + 1];
+    ordered.splice(state.first, state.last - state.first + 2, next, ...ordered.slice(state.first, state.last + 1));
+  }
+  return applyInventoryOrder(bundle, ordered);
+}
+
+export function organizeInventory(bundle: SaveBundle, requestedCriteria: InventorySortCriterion | InventorySortRule | readonly (InventorySortCriterion | InventorySortRule)[], infoById: ReadonlyMap<number, UnitInfo>): InventoryReorderResult {
+  const entries = inventoryEntries(bundle);
+  const requested = Array.isArray(requestedCriteria) ? requestedCriteria : [requestedCriteria];
+  const rules = requested.map(item => typeof item === "string" ? { criterion: item, direction: "asc" as const } : item).filter((rule, index, all) => all.findIndex(item => item.criterion === rule.criterion) === index);
+  if (!rules.length) return { moved: false, changed: 0, mapping: Object.fromEntries(entries.map(([key]) => [key, key])) };
+  const referenced = new Set<string>();
+  const parties = bundle.parties.parties;
+  if (parties && typeof parties === "object") for (const party of Object.values(parties as Record<string, JsonObject>)) {
+    const slots = party?.slots;
+    if (slots && typeof slots === "object") Object.values(slots as JsonObject).forEach(key => referenced.add(String(key)));
+  }
+  const score = ([key, unit]: [string, UnitRecord], criterion: InventorySortCriterion): number => {
+    const info = infoById.get(Number(unit.unitId));
+    if (criterion === "party") return referenced.has(key) ? 0 : 1;
+    if (criterion === "element") { const index = ELEMENTS.indexOf(String(info?.elementName) as typeof ELEMENTS[number]); return index >= 0 ? index : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "rarity") { const rarity = Number(info?.rarity); return Number.isInteger(rarity) && rarity >= 0 && rarity <= 7 ? rarity : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "unitId") { const unitId = Number(unit.unitId); return Number.isFinite(unitId) ? unitId : Number.MAX_SAFE_INTEGER; }
+    const type = Number(unit.type);
+    return Number.isInteger(type) && type >= 0 && type < TYPES.length ? type : Number.MAX_SAFE_INTEGER;
+  };
+  const ordered = entries.map((entry, index) => ({ entry, index, scores: rules.map(rule => score(entry, rule.criterion)) })).sort((left, right) => {
+    for (let index = 0; index < rules.length; index++) if (left.scores[index] !== right.scores[index]) return (left.scores[index] - right.scores[index]) * (rules[index].direction === "asc" ? 1 : -1);
+    return left.index - right.index;
+  }).map(item => item.entry[0]);
+  return applyInventoryOrder(bundle, ordered);
+}
+
+export function normalizeInventoryKeys(bundle: SaveBundle): { changed: number; nextKey: number } {
+  const entries = inventoryEntries(bundle);
+  const mapping = new Map(entries.map(([oldKey], index) => [oldKey, String(index)]));
+  bundle.inventory.playerUnits = Object.fromEntries(entries.map(([oldKey, unit]) => [mapping.get(oldKey), unit]));
+  bundle.inventory.nextKey = entries.length;
+  remapPartyReferences(bundle, mapping);
   return { changed: entries.filter(([oldKey], index) => oldKey !== String(index)).length, nextKey: entries.length };
 }
 
