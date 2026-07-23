@@ -1,6 +1,6 @@
 {
   "name": "brave-frontier-legacy-save-studio",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Editor desktop offline e seguro para saves de Brave Frontier: Legacy.",
   "author": "Legacy Save Studio Community",
   "private": true,
@@ -46,15 +46,31 @@
     "productName": "Legacy Save Studio",
     "asar": true,
     "npmRebuild": false,
-    "directories": { "output": "release" },
-    "files": ["electron/**/*", "out/**/*", "package.json"],
-    "extraFiles": [
-      { "from": "LICENSE", "to": "LICENSE.LegacySaveStudio.txt" },
-      { "from": "THIRD_PARTY_NOTICES.md", "to": "THIRD_PARTY_NOTICES.md" }
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "out/**/*",
+      "package.json"
     ],
-    "extraMetadata": { "main": "electron/main.cjs" },
+    "extraFiles": [
+      {
+        "from": "LICENSE",
+        "to": "LICENSE.LegacySaveStudio.txt"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      }
+    ],
+    "extraMetadata": {
+      "main": "electron/main.cjs"
+    },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "artifactName": "LegacySaveStudio-Setup-${version}.${ext}"
     },
     "nsis": {
