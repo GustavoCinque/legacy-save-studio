@@ -12,6 +12,7 @@
 
 - Opens and writes saves locally in Chrome, Edge, or the desktop app.
 - Edits player data, owned units, levels, experience, BB, SBB, bonuses, and Imps.
+- Organizes owned units by party presence, element, rarity, or type, with adjacent block movement that preserves party references.
 - Supports Lord, Anima, Breaker, Guardian, Oracle, and Rex unit types.
 - Filters units by name, ID, element, rarity, and type.
 - Adds catalog units individually or in bulk.
