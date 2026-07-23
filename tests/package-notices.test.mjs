@@ -25,7 +25,7 @@ test("package and lockfile versions stay synchronized for release tagging", asyn
     read("package.json").then(JSON.parse),
     read("package-lock.json").then(JSON.parse),
   ]);
-  assert.equal(pkg.version, "0.1.9");
+  assert.match(pkg.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
   assert.equal(lock.version, pkg.version);
   assert.equal(lock.packages[""].version, pkg.version);
 });

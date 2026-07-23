@@ -19,3 +19,10 @@ test("eval: every Electron packaging path exposes both project notices without r
   assert.doesNotMatch(script, /Join-Path \$target 'LICENSE'/);
   assert.ok(pkg.build.extraFiles.every(entry => entry.to !== "LICENSE"));
 });
+
+test("eval: release validation accepts future package versions without editing tests", async () => {
+  const source = await read("tests/package-notices.test.mjs");
+  assert.doesNotMatch(source, /assert\.equal\(pkg\.version,\s*["']\d+\.\d+\.\d+/);
+  assert.match(source, /assert\.equal\(lock\.version, pkg\.version\)/);
+  assert.match(source, /assert\.equal\(lock\.packages\[""\]\.version, pkg\.version\)/);
+});
