@@ -7,7 +7,7 @@ export type JsonObject = Record<string, unknown>;
 export type UnitRecord = Record<(typeof UNIT_FIELDS)[number], number> & { unitId: string; [key: string]: unknown };
 export interface UnitInfo { unitId: number; unitName?: string; unitNumber?: number; element?: number; elementName?: string; rarity?: number; maxLevel?: number; evoFrom?: number | null; evoInto?: number | null; sbbAbility?: unknown; sbbId?: unknown; [key: string]: unknown }
 export interface SaveBundle { player: JsonObject; inventory: JsonObject; parties: JsonObject }
-export type InventorySortCriterion = "party" | "element" | "rarity" | "type" | "unitId";
+export type InventorySortCriterion = "party" | "element" | "rarity" | "type" | "unitId" | "level" | "exp" | "bb" | "sbb";
 export type InventorySortDirection = "asc" | "desc";
 export type InventorySortRule = { criterion: InventorySortCriterion; direction: InventorySortDirection };
 export type InventoryReorderResult = { moved: boolean; changed: number; mapping: Record<string, string> };
@@ -201,6 +201,10 @@ export function organizeInventory(bundle: SaveBundle, requestedCriteria: Invento
     if (criterion === "element") { const index = ELEMENTS.indexOf(String(info?.elementName) as typeof ELEMENTS[number]); return index >= 0 ? index : Number.MAX_SAFE_INTEGER; }
     if (criterion === "rarity") { const rarity = Number(info?.rarity); return Number.isInteger(rarity) && rarity >= 0 && rarity <= 7 ? rarity : Number.MAX_SAFE_INTEGER; }
     if (criterion === "unitId") { const unitId = Number(unit.unitId); return Number.isFinite(unitId) ? unitId : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "level") { const level = Number(unit.currentLevel); return Number.isFinite(level) ? level : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "exp") { const exp = Number(unit.currentExperience); return Number.isFinite(exp) ? exp : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "bb") { const bb = Number(unit.currentBBLevel); return Number.isFinite(bb) ? bb : Number.MAX_SAFE_INTEGER; }
+    if (criterion === "sbb") { const sbb = Number(unit.currentSBBLevel); return Number.isFinite(sbb) ? sbb : Number.MAX_SAFE_INTEGER; }
     const type = Number(unit.type);
     return Number.isInteger(type) && type >= 0 && type < TYPES.length ? type : Number.MAX_SAFE_INTEGER;
   };

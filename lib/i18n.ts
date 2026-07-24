@@ -67,6 +67,10 @@ Object.assign(en,{moveUp:"Move up (previous internal key)",moveDown:"Move down (
 Object.assign(pt,{moveUp:"Mover para cima (chave interna anterior)",moveDown:"Mover para baixo (próxima chave interna)"});
 Object.assign(fr,{moveUp:"Déplacer vers le haut (clé interne précédente)",moveDown:"Déplacer vers le bas (clé interne suivante)"});
 Object.assign(es,{moveUp:"Mover hacia arriba (clave interna anterior)",moveDown:"Mover hacia abajo (siguiente clave interna)"});
+Object.assign(en,{sortLevel:"Level",sortExp:"EXP",sortBb:"BB",sortSbb:"SBB"});
+Object.assign(pt,{sortLevel:"Nível",sortExp:"EXP",sortBb:"BB",sortSbb:"SBB"});
+Object.assign(fr,{sortLevel:"Niveau",sortExp:"EXP",sortBb:"BB",sortSbb:"SBB"});
+Object.assign(es,{sortLevel:"Nivel",sortExp:"EXP",sortBb:"BB",sortSbb:"SBB"});
 export const dictionaries: Record<Locale, Dictionary> = {en,pt,fr,es};
 export function detectLocale(value?: string | null): Locale { const short=(value||"").toLowerCase().split("-")[0]; return locales.includes(short as Locale)?short as Locale:"en"; }
 export function translate(locale:Locale,key:string,vars:Record<string,string|number>={}) { let value=dictionaries[locale][key]??en[key]??key; for(const [k,v] of Object.entries(vars))value=value.replaceAll(`{${k}}`,String(v)); return value; }
